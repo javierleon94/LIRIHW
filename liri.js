@@ -4,12 +4,12 @@ var fs = require('fs');
 
 var twitter = require('twitter')
 var request = require('request')
-var spotify = require('spotify')
+var spotify = require('node-spotify-api')
 var key = require('./keys.js');
 
 
-// var spotify = new spotify(key.spotify);
-// var client = new twitter(key.twitter);
+var spotify = new spotify(key.spotify);
+var client = new twitter(key.twitter);
 var commands = process.argv[2];
 
 // var nspotify = new Spotify(keys.spotify);
@@ -22,13 +22,13 @@ switch (commands) {
         myTweets()
         break;
     case 'spotify-this-song':
-        spotifySong()
+        spotifyThisSong()
         break;
     case 'movie-this':
         movieThis()
         break;
     case 'do-what-it-says':
-        doIt()
+		doWhatItSays()
         break;
 	// Instructions displayed in terminal to the user
 	default: console.log("\r\n" + "Try typing one of the following commands after 'node liri.js' : " + "\r\n" +
@@ -73,12 +73,7 @@ switch (commands) {
 	};
 // Tweet function, uses the Twitter module to call the Twitter api
 function myTweets() {
-	var client = new twitter({
-		consumer_key: keys.twitterKeys.consumer_key,
-		consumer_secret: keys.twitterKeys.consumer_secret,
-		access_token_key: keys.twitterKeys.access_token_key,
-		access_token_secret: keys.twitterKeys.access_token_secret, 
-	});
+	
 	var twitterUsername = process.argv[3];
 	if(!twitterUsername){
 		twitterUsername = "JahdashaFlagg";
@@ -105,26 +100,21 @@ function myTweets() {
 // Spotify function, uses the Spotify module to call the Spotify api
 
 function spotifyThisSong() {
-    var whatSong = process.argv[3]
-        if(whatSong === undefined) {
-            console.log("Freebird")
+    var nameOfSong = process.argv[3]
+        if(nameOfSong === undefined) {
+            console.log("love lockdown")
         }
-    spotify.search({ type: 'track', query: whatSong}, function(err, data) {
-        if (err) {
-            console.log('Error occurred: ' + err);
-            return;
-        }
-
-    var spotifyResponse = data.tracks.items;
-        console.log("======================")    
-        console.log("Artist: " + spotifyResponse[0].artists[0].name)
-        console.log("Song: " + spotifyResponse[0].name)
-        console.log("Link: "+ spotifyResponse[0].album.external_urls.spotify)
-        console.log("Album: " + spotifyResponse[0].album.name)
-        console.log("======================")
-    })
-}
-
+		spotify.search({type: 'track', query: nameOfSong}, function (error, data){
+			if (error) { console.log(error); 
+				return;
+			}
+			var spotifyResponse = data.tracks.items;
+				console.log("\nSong: " + spotifyResponse[0].name + "\nArtist: " + spotifyResponse[0].album.artists[0].name + "\nAlbum: " + spotifyResponse[0].album.name + "\nLink: " + spotifyResponse[0].external_urls.spotify)
+			fs.appendFile('log.txt', ("Song: " + spotifyResponse[0].name + "\nArtist: " + spotifyResponse[0].album.artists[0].name + "\nAlbum: " + spotifyResponse[0].album.name + "\nLink: " + spotifyResponse[0].external_urls.spotify), function(error){
+				if (error) {console.log(error)}
+			})
+		})
+	}
 	// Do What It Says function, uses the reads and writes module to access the random.txt file and do what's written in it
 	function doWhatItSays() {
 		fs.readFile("random.txt", "utf8", function(error, data){
