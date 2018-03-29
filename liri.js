@@ -1,32 +1,50 @@
-	// Node module imports needed to run the functions
-	var fs = require("fs"); //reads and writes files
-	var request = require("request");
-	var keys = require("keys.js");
-	var twitter = require("twitter");
-	var spotify = require ("spotify");
-	var liriArgument = process.argv[2];
+require("dotenv").config();
+
+var fs = require('fs');
+
+var twitter = require('twitter')
+var request = require('request')
+var spotify = require('spotify')
+var key = require('./keys.js');
+
+
+// var spotify = new spotify(key.spotify);
+// var client = new twitter(key.twitter);
+var commands = process.argv[2];
+
+// var nspotify = new Spotify(keys.spotify);
+// var nclient = new Twitter(keys.twitter);
+
 // ---------------------------------------------------------------------------------------------------------------
-	// Possible commands for this liri app
-	switch(liriArgument) {
-		case "my-tweets": myTweets(); break;
-		case "spotify-this-song": spotifyThisSong(); break;
-		case "movie-this": movieThis(); break;
-		case "do-what-it-says": doWhatItSays(); break;
-		// Instructions displayed in terminal to the user
-		default: console.log("\r\n" +"Try typing one of the following commands after 'node liri.js' : " +"\r\n"+
-			"1. my-tweets 'any twitter name' " +"\r\n"+
-			"2. spotify-this-song 'any song name' "+"\r\n"+
-			"3. movie-this 'any movie name' "+"\r\n"+
-			"4. do-what-it-says."+"\r\n"+
-			"Be sure to put the movie or song name in quotation marks if it's more than one word.");
-	};
+// Possible commands for this liri app
+switch (commands) {
+    case 'my-tweets':
+        myTweets()
+        break;
+    case 'spotify-this-song':
+        spotifySong()
+        break;
+    case 'movie-this':
+        movieThis()
+        break;
+    case 'do-what-it-says':
+        doIt()
+        break;
+	// Instructions displayed in terminal to the user
+	default: console.log("\r\n" + "Try typing one of the following commands after 'node liri.js' : " + "\r\n" +
+		"1. my-tweets 'any twitter name' " + "\r\n" +
+		"2. spotify-this-song 'any song name' " + "\r\n" +
+		"3. movie-this 'any movie name' " + "\r\n" +
+		"4. do-what-it-says." + "\r\n" +
+		"Be sure to put the movie or song name in quotation marks if it's more than one word.");
+};
 // ---------------------------------------------------------------------------------------------------------------
 // Functions
 	// Movie function, uses the Request module to call the OMDB api
 	function movieThis(){
 		var movie = process.argv[3];
 		if(!movie){
-			movie = "mr nobody";
+			movie = "finding nemo";
 		}
 		params = movie
 		request("http://www.omdbapi.com/?t=" + params + "&y=&plot=short&r=json&tomatoes=true", function (error, response, body) {
@@ -53,60 +71,60 @@
 			}
 		});
 	};
-	// Tweet function, uses the Twitter module to call the Twitter api
-	function myTweets() {
-		var client = new twitter({
-			consumer_key: keys.twitterKeys.consumer_key,
-			consumer_secret: keys.twitterKeys.consumer_secret,
-			access_token_key: keys.twitterKeys.access_token_key,
-			access_token_secret: keys.twitterKeys.access_token_secret, 
-		});
-		var twitterUsername = process.argv[3];
-		if(!twitterUsername){
-			twitterUsername = "JahdashaFlagg";
-		}
-		params = {screen_name: twitterUsername};
-		client.get("statuses/user_timeline/", params, function(error, data, response){
-			if (!error) {
-				for(var i = 0; i < data.length; i++) {
-					//console.log(response); // Show the full response in the terminal
-					var twitterResults = 
-					"@" + data[i].user.screen_name + ": " + 
-					data[i].text + "\r\n" + 
-					data[i].created_at + "\r\n" + 
-					"------------------------------ " + i + " ------------------------------" + "\r\n";
-					console.log(twitterResults);
-					log(twitterResults); // calling log function
-				}
-			}  else {
-				console.log("Error :"+ error);
-				return;
-			}
-		});
+// Tweet function, uses the Twitter module to call the Twitter api
+function myTweets() {
+	var client = new twitter({
+		consumer_key: keys.twitterKeys.consumer_key,
+		consumer_secret: keys.twitterKeys.consumer_secret,
+		access_token_key: keys.twitterKeys.access_token_key,
+		access_token_secret: keys.twitterKeys.access_token_secret, 
+	});
+	var twitterUsername = process.argv[3];
+	if(!twitterUsername){
+		twitterUsername = "JahdashaFlagg";
 	}
-	// Spotify function, uses the Spotify module to call the Spotify api
+	params = {screen_name: twitterUsername};
+	client.get("statuses/user_timeline/", params, function(error, data, response){
+		if (!error) {
+			for(var i = 0; i < data.length; i++) {
+				//console.log(response); // Show the full response in the terminal
+				var twitterResults = 
+				"@" + data[i].user.screen_name + ": " + 
+				data[i].text + "\r\n" + 
+				data[i].created_at + "\r\n" + 
+				"------------------------------ " + i + " ------------------------------" + "\r\n";
+				console.log(twitterResults);
+				log(twitterResults); // calling log function
+			}
+		}  else {
+			console.log("Error :"+ error);
+			return;
+		}
+	});
+}
+// Spotify function, uses the Spotify module to call the Spotify api
 
-    function spotifyThisSong() {
-        var whatSong = process.argv[3]
-            if(whatSong === undefined) {
-                console.log("Freebird")
-            }
-        spotify.search({ type: 'track', query: whatSong}, function(err, data) {
-            if (err) {
-                console.log('Error occurred: ' + err);
-                return;
-            }
-    
-        var spotifyResponse = data.tracks.items;
-            console.log("======================")    
-            console.log("Artist: " + spotifyResponse[0].artists[0].name)
-            console.log("Song: " + spotifyResponse[0].name)
-            console.log("Link: "+ spotifyResponse[0].album.external_urls.spotify)
-            console.log("Album: " + spotifyResponse[0].album.name)
-            console.log("======================")
-        })
-    }
-    
+function spotifyThisSong() {
+    var whatSong = process.argv[3]
+        if(whatSong === undefined) {
+            console.log("Freebird")
+        }
+    spotify.search({ type: 'track', query: whatSong}, function(err, data) {
+        if (err) {
+            console.log('Error occurred: ' + err);
+            return;
+        }
+
+    var spotifyResponse = data.tracks.items;
+        console.log("======================")    
+        console.log("Artist: " + spotifyResponse[0].artists[0].name)
+        console.log("Song: " + spotifyResponse[0].name)
+        console.log("Link: "+ spotifyResponse[0].album.external_urls.spotify)
+        console.log("Album: " + spotifyResponse[0].album.name)
+        console.log("======================")
+    })
+}
+
 	// Do What It Says function, uses the reads and writes module to access the random.txt file and do what's written in it
 	function doWhatItSays() {
 		fs.readFile("random.txt", "utf8", function(error, data){
